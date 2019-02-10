@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/06 18:39:17 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/08 17:40:32 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/09 19:02:39 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,27 @@
 #include <unistd.h>
 #include "./libft/libft.h"
 
+//
+// typedef struct	s_map
+// {
+// 	int		pl;
+// 	int		x;
+// 	int		y;
+// 	char	**map;
+// }				t_map;
+//
+// typedef struct	s_pc
+// {
+// 	int		x;
+// 	int		y;
+// 	char	**pc;
+// }				t_pc;
+
 typedef struct 	s_coord
 {
 	int			x;
 	int			y;
+	char		data;
 }				t_coord;
 
 typedef struct	s_filler
@@ -25,6 +42,13 @@ typedef struct	s_filler
 	t_coord		coords;
 	char		sign;
 }				t_filler;
+
+typedef struct s_piece
+{
+	t_coord		size_of_piece;
+	char 		**map;
+	int			number_of_stars;
+}				t_piece;
 
 typedef struct 	s_all
 {
@@ -34,17 +58,17 @@ typedef struct 	s_all
 	int			board_size;
 	int			**heat_map;
 	t_coord 	coords;
+	t_piece		piece;
+	int			width;
+	int			height;
 }				t_all;
 
-void	get_player_number(t_all *all, char *file)
+void	get_player_number(t_all *all)
 {
 	char *line;
-	int fd;
 
 	line = NULL;
-	printf("here2\n");
-	fd = open(file, O_RDONLY);
-	if ((get_next_line(fd, &line)) == -1)
+	if ((get_next_line(0, &line)) == -1)
 	{
 		ft_putendl("Error blin");
 		exit(-1);
@@ -53,6 +77,7 @@ void	get_player_number(t_all *all, char *file)
 	{
 		all->player.sign = 'O';
 		all->my_enemy.sign = 'X';
+		printf("done");
 	}
 	else
 	{
@@ -60,74 +85,70 @@ void	get_player_number(t_all *all, char *file)
 		all->player.sign = 'O';
 	}
 	free(line);
-	close(fd);
 }
 
-void get_info(char *file, t_all *all, int fd, char *line)
+void get_size(t_all *all, char *line)
 {
-	int	res;
-	char	**info;
+	char **info;
 
-	printf("here4\n");
-	if ((res = get_next_line(fd, &line) == -1))
+	while (get_next_line == 1)
 	{
-			ft_putendl("Error blin");
-			exit(-1);
-	}
-	if (!(info = ft_strsplit(line, ' ')))
-	{
-		ft_putendl("Error blin");
-		exit(-1);
-	}
-	for (int i = 0; i < 10; i++)
-	{
-		for (int j = 0; j < 10; j++)
+		if (ft_strcmp(line, "Plateau ") == 0)
 		{
-			printf("%c", info[i][j]);
+			info = ft_strsplit(line, " ");
+			all->width = info[2];
+			all->height = info[1];
+			all->board_size = all->coords.x * all->coords.y;
 		}
 	}
-	all->coords.x = ft_atoi(info[2]);
-	all->coords.y = ft_atoi(info[1]);
-	// all->board_size = (all->coords.x) * (all->coords.y);
-	printf("OK x is %d and y is %d", all->coords.x, all->coords.y);
-	printf("This is my board size: %d\n", all->board_size);
-	free(line);
-	close(fd);
 }
 
-void get_board(t_all *all, char *file)
+void get_map(t_all *all)
 {
-	int a;
-	int b;
-	int fd;
 	char *line;
+	int i;
+	int j;
+	int num;
+	int reading;
 
-	a = 0;
-	b = 0;
-	fd = open(file, O_RDONLY);
-	get_info(file, all, fd, line);
-	printf("here3\n");
-	// while (get_next_line(fd, &line) == 1)
-	// {
-	// 	read_info =
-	// 	while(a < all->coords.x)
-	// 	{
-    //
-	// 	}
-	// }
+	line = NULL;
+	num = 0;
+	i = 0;
+	j = 0;
+	reading = 4;
+	get_size(all, line);
+	if(ft_strcmp(line, "000") == 0)
+	{
+		while (i < all->height)
+		{
+			while (j < all->width)
+			{
+				all->coords[num].y = i;
+				all->coords[num].x = j;
+				all->coords[num].data = line[reading++];
+				printf("%c", all->coords[num].data);
+				j++;
+				num++;
+			}
+			printf("\n");
+			reading = 4;
+			j = 0;
+			i++;
+			get_next_line(0, &line);
+		}
+	}
 }
 
 
-int main(int argc, char **argv)
+int main(void)
 {
 	t_all *all;
 
 	all = (t_all*)malloc(sizeof(t_all));
-	printf("here1\n");
-	get_player_number(all, argv[1]);
-	// while (1)
-	// {
-    get_board(all, argv[1]);
-	// }
+	get_player_number(all);
+	while (1)
+	{
+    	get_map(all);
+	}
 	free(all);
 }
