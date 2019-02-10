@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/06 18:39:17 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/09 19:02:39 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/09 19:45:04 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,67 +57,73 @@ typedef struct 	s_all
 	char		**game_board;
 	int			board_size;
 	int			**heat_map;
-	t_coord 	coords;
+	t_coord 	*coords;
 	t_piece		piece;
 	int			width;
 	int			height;
 }				t_all;
 
-void	get_player_number(t_all *all)
+void read_stuff(t_all *all);
+void	get_player_number(t_all *all, char *line);
+void get_size(t_all *all, char *line);
+void get_map(t_all *all, char *line);
+
+
+
+void read_stuff(t_all *all)
 {
 	char *line;
 
 	line = NULL;
-	if ((get_next_line(0, &line)) == -1)
+	while (get_next_line(0, &line) == 1)
 	{
-		ft_putendl("Error blin");
-		exit(-1);
+		get_player_number(all, line);
+		get_size(all, line);
+		get_map(all, line);
 	}
+	free(line);
+}
+
+void	get_player_number(t_all *all, char *line)
+{
 	if(ft_strcmp(line, "p1") == 0)
 	{
 		all->player.sign = 'O';
 		all->my_enemy.sign = 'X';
-		printf("done");
 	}
 	else
 	{
 		all->player.sign = 'X';
 		all->player.sign = 'O';
 	}
-	free(line);
 }
 
 void get_size(t_all *all, char *line)
 {
 	char **info;
 
-	while (get_next_line == 1)
+	if (ft_strncmp(line, "Plateau ", 8) == 0)
 	{
-		if (ft_strcmp(line, "Plateau ") == 0)
-		{
-			info = ft_strsplit(line, " ");
-			all->width = info[2];
-			all->height = info[1];
-			all->board_size = all->coords.x * all->coords.y;
-		}
+		info = ft_strsplit(line, ' ');
+		all->width = ft_atoi(info[2]);
+		all->height = ft_atoi(info[1]);
+		all->board_size = all->width * all->height;
 	}
+	all->coords = (t_coord*)malloc(sizeof(t_coord) * all->board_size);
 }
 
-void get_map(t_all *all)
+void get_map(t_all *all, char *line)
 {
-	char *line;
 	int i;
 	int j;
 	int num;
 	int reading;
 
-	line = NULL;
 	num = 0;
 	i = 0;
 	j = 0;
 	reading = 4;
-	get_size(all, line);
-	if(ft_strcmp(line, "000") == 0)
+	if(ft_strncmp(line, "000", 3) == 0)
 	{
 		while (i < all->height)
 		{
@@ -145,10 +151,9 @@ int main(void)
 	t_all *all;
 
 	all = (t_all*)malloc(sizeof(t_all));
-	get_player_number(all);
-	while (1)
-	{
-    	get_map(all);
-	}
+	// while (1)
+	// {
+		read_stuff(all);
+	// }
 	free(all);
 }
