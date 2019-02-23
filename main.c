@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/22 10:34:00 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/22 10:48:55 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/22 20:21:45 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ char* get_map_size(char* line, t_data *data)
     line_data = ft_strsplit(line, ' ');
     data->height = ft_atoi(line_data[1]);
     data->width = ft_atoi(line_data[2]);
-    data->total_dots = data->height * data->width;
   }
   return(line);
 }
@@ -66,15 +65,11 @@ char* get_piece_size(char* line, t_data *data)
 
     if(ft_strncmp(line, "Piece", 5) == 0)
     {
-      //  printf("\n%s\n", line); // выводим строку, чтоб убедиться, что это нужная строка
       line_data = ft_strsplit(line, ' ');
       data->piece_h = ft_atoi(line_data[1]);
       data->piece_w = ft_atoi(line_data[2]);
-      data->total_piece_dots = data->piece_h * data->piece_w;
-      //  printf("piece x = %d  piece y = %d\n",data->piece_w, data->piece_h);// выводим данные куска
     }
-
-      return(line);
+    return(line);
 }
 
 char* get_piece(char* line, t_data *data)
@@ -105,18 +100,23 @@ char* get_piece(char* line, t_data *data)
 
 char* get_player(char* line, t_data *data)
 {
-  while(ft_strncmp(line, "$$$ exec p", 9) != 0)
+  while(ft_strncmp(line, "$$$ exec p1", 9) != 0)
     get_next_line(0, &line);
-  if (ft_strstr(line, "vmuradia"))
-	{
-		data->my_sign = 'O';
-		data->enemy_sign = 'X';
-	}
-	else
-	{
-	  data->my_sign = 'X';
-		data->enemy_sign = 'O';
-	}
+  // if (ft_strncmp(line, "vmuradia", 8) == 0)
+	// {
+	// 	data->my_sign = 'O';
+	// 	data->enemy_sign = 'X';
+  //  // printf("I'm first %c", data->my_sign);
+	// }
+	// else
+	// {
+	//   data->my_sign = 'X';
+	// 	data->enemy_sign = 'O';
+  //  // printf("I'm second %c", data->my_sign);
+	// }
+  data->my_sign = (line[10] == '1' ? 'O' : 'X');
+	data->enemy_sign = (line[10] == '1' ? 'X' : 'O');
+  printf("my enemy is %c", data->enemy_sign);
   return (line);
 }
 
@@ -143,6 +143,10 @@ int main(void)
   while (get_next_line(0, &line) > 0)
   {
     read_each_line(line, data);
+    data->min = -1;
+    data->final_x = 0;
+    data->final_y = 0;
+    printf("my enemy is %c", data->enemy_sign);
     find_target(data);
   }
   free(line);
@@ -151,26 +155,60 @@ int main(void)
 
 void find_target(t_data *data)
 {
+  int k = 0;
+  int min_dest = 100;
+  int find;
   int x = 0;
   int y = 0;
-  int k = 0;
 
+  printf("my enemy is %c", data->enemy_sign);
   while(y < data->height)
   {
     while(x < data->width)
     {
       k = check_piece(data, x, y);
-     // printf("%d\n", k);
-      if(k == 1)
-        break;
+      if(k == 1 && data->map[y][x] != data->enemy_sign)
+      {
+        find_dest(data, x, y);
+      }
       x++;
     }
-    if(k == 1)
-      break;
     x = 0;
     y++;
   }
-  print_cords(y, x);
+  print_cords(data->final_y, data->final_x);
+}
+
+void find_dest(t_data *data, int x, int y)
+{
+  int j = 0;
+  int i = 0;
+  int dest = 0;
+  int right = 0;
+  int left = 0;
+
+printf("my enemy is %c", data->enemy_sign);
+  while(i < data->height)
+  {
+    while (j < data->width)
+    {
+      if (data->map[i][j] == data->enemy_sign)
+      {
+        right = i < y ? y - i : i - y;
+        left = j < x ? x - j : j - x;
+        dest = right + left;
+        if (data->min == -1 || data->min > dest)
+        {
+          data->min = dest;
+          data->final_x = x;
+          data->final_y = y;
+        }
+      }
+      j++;
+    }
+    j = 0;
+    i++;
+  }
 }
 
 void	print_cords(int y, int x)
@@ -187,14 +225,14 @@ int check_piece(t_data *data, int x, int y)
   int j = 0;
   int k = 0;
 
-  while(i < data->piece_h)
+  while(i < data->piece_h && y + i < data->height)
   {
-    while(j < data->piece_w)
+    while(j < data->piece_w && x + j < data->width)
     {
-      if(data->piece[i][j]== '*' && (data->map[y+i][x+j] == data->my_sign || data->map[y+i][x+j] == ft_tolower(data->my_sign)))
+      if(data->piece[i][j]== '*' && (data->map[y+i][x+j] != data->enemy_sign || data->map[y+i][x+j] != ft_tolower(data->enemy_sign)) 
+          && (data->map[y+i][x+j] == data->my_sign || data->map[y+i][x+j] == ft_tolower(data->my_sign)))
       {
         k++;
-        //printf("k = %d\n",k);
       }
       j++;
     }
@@ -204,96 +242,4 @@ int check_piece(t_data *data, int x, int y)
   return (k);
 }
 
-int find_my_y_piece(t_data *data)
-{
-  int x = 0;
-  int y = 0;
-
-  while(y < data->height)
-  {
-    while(x < data->width)
-    {
-      if(data->map[y][x] == data->my_sign)
-        {
-          //printf("%c\n", data->map[y][x]);
-          return (y);
-        }
-      x++;
-    }
-    x = 0;
-    y++;
-  }
-  return(-1);
-}
-
-int find_my_x_piece(t_data *data)
-{
-  int x = 0;
-  int y = 0;
-
-  while(y < data->height)
-  {
-    while(x< data->width)
-    {
-      if(data->map[y][x] == data->my_sign)
-        {
-          return (x);
-        }
-      x++;
-    }
-    x = 0;
-    y++;
-  }
-  return(-1);
-}
-
-int find_enemy_x(t_data *data)
-{
-  int x1 = 0;
-  int y1 = 0;
-
-  while(y1 < data->height)
-  {
-    while(x1< data->width)
-    {
-      if(data->map[y1][x1] == data->enemy_sign)
-        {
-          return (x1);
-        }
-      x1++;
-    }
-    x1 = 0;
-    y1++;
-  }
-  return(-1);
-}
-
-int find_enemy_y(t_data *data)
-{
-  int x1 = 0;
-  int y1 = 0;
-
-  while(y1 < data->height)
-  {
-    while(x1< data->width)
-    {
-      if(data->map[y1][x1] == data->enemy_sign)
-        {
-          return (y1);
-        }
-      x1++;
-    }
-    x1 = 0;
-    y1++;
-  }
-  return(-1);
-}
-
-void where_am_i(t_data *data)
-{
-  int my_x = find_my_x_piece(data);
-  int my_y = find_my_y_piece(data);
-  int enemy_x = find_enemy_x(data);
-  int enemy_y = find_enemy_y(data);
-}
 
