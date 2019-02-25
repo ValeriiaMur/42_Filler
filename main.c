@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/22 10:34:00 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/22 20:21:45 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/24 18:01:00 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,21 +102,23 @@ char* get_player(char* line, t_data *data)
 {
   while(ft_strncmp(line, "$$$ exec p1", 9) != 0)
     get_next_line(0, &line);
-  // if (ft_strncmp(line, "vmuradia", 8) == 0)
-	// {
-	// 	data->my_sign = 'O';
-	// 	data->enemy_sign = 'X';
-  //  // printf("I'm first %c", data->my_sign);
-	// }
-	// else
-	// {
-	//   data->my_sign = 'X';
-	// 	data->enemy_sign = 'O';
-  //  // printf("I'm second %c", data->my_sign);
-	// }
-  data->my_sign = (line[10] == '1' ? 'O' : 'X');
-	data->enemy_sign = (line[10] == '1' ? 'X' : 'O');
-  printf("my enemy is %c", data->enemy_sign);
+  if (ft_strstr(line, "vmuradia"))
+	{
+		data->my_sign = 'O';
+   // printf("sMy sign is %c\n", data->my_sign);
+		data->enemy = 'X';
+   // printf("This is enemy %c\n", data->enemy);
+	}
+	else
+	{
+	  data->my_sign = 'X';
+   // printf("OK second : My sign is %c\n", data->my_sign);
+		data->enemy = 'O';
+   // printf("This is enemy %c\n", data->enemy);
+	}
+  // data->my_sign = (line[10] == '1' ? 'O' : 'X');
+	// data->enemy = (line[10] == '1' ? 'X' : 'O');
+
   return (line);
 }
 
@@ -146,7 +148,6 @@ int main(void)
     data->min = -1;
     data->final_x = 0;
     data->final_y = 0;
-    printf("my enemy is %c", data->enemy_sign);
     find_target(data);
   }
   free(line);
@@ -161,13 +162,12 @@ void find_target(t_data *data)
   int x = 0;
   int y = 0;
 
-  printf("my enemy is %c", data->enemy_sign);
   while(y < data->height)
   {
     while(x < data->width)
     {
       k = check_piece(data, x, y);
-      if(k == 1 && data->map[y][x] != data->enemy_sign)
+      if(k == 1)
       {
         find_dest(data, x, y);
       }
@@ -187,21 +187,20 @@ void find_dest(t_data *data, int x, int y)
   int right = 0;
   int left = 0;
 
-printf("my enemy is %c", data->enemy_sign);
   while(i < data->height)
   {
     while (j < data->width)
     {
-      if (data->map[i][j] == data->enemy_sign)
+      if (data->map[i][j] == data->enemy)
       {
         right = i < y ? y - i : i - y;
         left = j < x ? x - j : j - x;
         dest = right + left;
         if (data->min == -1 || data->min > dest)
         {
-          data->min = dest;
-          data->final_x = x;
-          data->final_y = y;
+            data->min = dest;
+            data->final_x = x;
+            data->final_y = y;
         }
       }
       j++;
@@ -229,17 +228,50 @@ int check_piece(t_data *data, int x, int y)
   {
     while(j < data->piece_w && x + j < data->width)
     {
-      if(data->piece[i][j]== '*' && (data->map[y+i][x+j] != data->enemy_sign || data->map[y+i][x+j] != ft_tolower(data->enemy_sign)) 
-          && (data->map[y+i][x+j] == data->my_sign || data->map[y+i][x+j] == ft_tolower(data->my_sign)))
+      if(data->piece[i][j]== '*' && 
+        (data->map[y+i][x+j] == data->my_sign || data->map[y+i][x+j] == ft_tolower(data->my_sign)))
       {
         k++;
       }
+      else if (data->piece[i][j] == '*' && data->map[y+i][x+j] != '.')
+        return (0);
       j++;
     }
+    if (!check_row(data,i, j))
+      return (0);
     j = 0;
     i++;
   }
-  return (k);
+  return (k == 1 && check_column(data, i) ? 1 : 0);
 }
 
+int	check_column(t_data *data, int i)
+{
+	int j;
+
+	j = 0;
+	while (i < data->piece_h)
+	{
+		while (j < data->piece_w)
+		{
+			if (data->piece[i][j] == '*')
+				return (0);
+			j++;
+		}
+		j = 0;
+		i++;
+	}
+	return (1);
+}
+
+int	check_row(t_data *data, int i, int j)
+{
+	while (j < data->piece_w)
+	{
+		if (data->piece[i][j] == '*')
+			return (0);
+		j++;
+	}
+	return (1);
+}
 
