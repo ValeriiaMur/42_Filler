@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/25 09:08:56 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/25 17:20:53 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/26 16:12:58 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,27 +33,28 @@ char	*get_map_size(char *line, t_data *data)
 
 char	*get_map(char *line, t_data *data)
 {
-	int i;
-	int j;
-	int read_point;
-
-	i = 0;
-	j = 0;
-	read_point = 4;
+	data->i = 0;
+	data->j = 0;
+	data->read_point = 4;
 	while (ft_strncmp(line, "000", 3) != 0)
-		get_next_line(0, &line);
-	make_a_map(data);
-	while (i < data->height)
 	{
-		while (j < data->width)
-		{
-			data->map[i][j] = line[read_point++];
-			j++;
-		}
-		i++;
-		j = 0;
+		free(line);
 		get_next_line(0, &line);
-		read_point = 4;
+	}
+	free(line);
+	make_a_map(data);
+	while (data->i < data->height)
+	{
+		while (data->j < data->width)
+		{
+			data->map[data->i][data->j] = line[data->read_point++];
+			data->j++;
+		}
+		data->i++;
+		data->j = 0;
+		free(line);
+		get_next_line(0, &line);
+		data->read_point = 4;
 	}
 	return (line);
 }
@@ -89,6 +90,7 @@ char	*get_piece(char *line, t_data *data)
 	make_piece(data);
 	while (i < data->piece_h)
 	{
+		free(line);
 		get_next_line(0, &line);
 		while (j < data->piece_w)
 		{
@@ -104,20 +106,12 @@ char	*get_piece(char *line, t_data *data)
 
 char	*get_player(char *line, t_data *data)
 {
-	while (ft_strncmp(line, "$$$ exec p1", 9) != 0)
+	while (ft_strncmp(line, "$$$ exec p", 9) != 0)
 	{
 		free(line);
 		get_next_line(0, &line);
 	}
-	if (ft_strstr(line, "vmuradia"))
-	{
-		data->my_sign = 'O';
-		data->enemy = 'X';
-	}
-	else
-	{
-		data->my_sign = 'X';
-		data->enemy = 'O';
-	}
+	data->my_sign = (line[10] == '1' ? 'O' : 'X');
+	data->enemy = (line[10] == '1' ? 'X' : 'O');
 	return (line);
 }

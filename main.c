@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/22 10:34:00 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/25 17:16:51 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/02/26 16:05:27 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void	read_each_line(char *line, t_data *data)
 	line = get_map(line, data);
 	line = get_piece_size(line, data);
 	line = get_piece(line, data);
+	//free(line);
 }
 
 int		main(void)
@@ -56,7 +57,7 @@ void	*make_a_map(t_data *data)
 	int i;
 
 	i = 0;
-	data->map = (char **)malloc(sizeof(char*) * (data->width + 1));
+	data->map = (char **)malloc(sizeof(char*) * (data->height + 1));
 	if (!data->map)
 		return (NULL);
 	while (i < data->height + 1)
