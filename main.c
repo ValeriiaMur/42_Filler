@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/22 10:34:00 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/26 16:05:27 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/03/02 15:06:42 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	read_each_line(char *line, t_data *data)
 	line = get_map(line, data);
 	line = get_piece_size(line, data);
 	line = get_piece(line, data);
-	//free(line);
+	free(line);
 }
 
 int		main(void)
@@ -40,6 +40,9 @@ int		main(void)
 		data->final_x = 0;
 		data->final_y = 0;
 		find_target(data);
+		free_2d((void**)data->map, data->height);
+		free_2d((void**)data->piece, data->piece_h);
+		free(data);
 	}
 	return (0);
 }

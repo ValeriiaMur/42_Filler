@@ -6,7 +6,7 @@
 /*   By: vmuradia <vmuradia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/25 09:08:56 by vmuradia          #+#    #+#             */
-/*   Updated: 2019/02/26 16:12:58 by vmuradia         ###   ########.fr       */
+/*   Updated: 2019/03/02 15:07:53 by vmuradia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ char	*get_map(char *line, t_data *data)
 		free(line);
 		get_next_line(0, &line);
 	}
-	free(line);
 	make_a_map(data);
 	while (data->i < data->height)
 	{
